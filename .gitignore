@@ -1,0 +1,6 @@
+# The two forks are independent git repos, tracked upstream, not submodules.
+seedsigner/
+seedsigner-os/
+
+# Build artefacts
+images/*.img
