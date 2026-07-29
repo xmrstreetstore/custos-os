@@ -54,6 +54,23 @@ if [ -d "$T/opt/javacard-cap" ]; then
 fi
 
 echo
+echo "=== self-test (opt-in diagnostic) ==="
+for f in /usr/bin/smartcard-selftest /etc/init.d/S90selftest; do
+  if [ ! -e "$T$f" ]; then bad "$f missing"
+  elif [ ! -x "$T$f" ]; then bad "$f present but NOT executable (would fail silently at boot)"
+  else ok "$f (executable)"; fi
+done
+
+echo
+echo "=== branding ==="
+check_path "$T/opt/src/seedsigner/resources/img/logo_black_240.png" "boot logo present"
+# The splash positions the version string from this constant. If the artwork and
+# the constant disagree, the version number is drawn across the logo.
+lh=$(grep -oE '^\s*logo_height = [0-9]+' "$T/opt/src/seedsigner/views/screensaver.py" 2>/dev/null | grep -oE '[0-9]+')
+if [ "$lh" = "140" ]; then ok "logo_height = $lh (matches the Custos artwork)"
+else bad "logo_height = ${lh:-unset}, expected 140 - version text will overlap the logo"; fi
+
+echo
 echo "=== the app itself ==="
 check_path "$T/opt/src/seedsigner/controller.py" "seedsigner app present"
 check_path "$T/opt/src/seedsigner/version.json" "version.json (missing one bricks the splash)"
