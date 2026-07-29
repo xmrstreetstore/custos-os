@@ -42,6 +42,17 @@ for m in pysatochip smartcard pygp embit; do
 done
 
 echo
+echo "=== pysatochip's own dependencies ==="
+# Shipping pysatochip without these gets you "No module named 'ecdsa'" on the
+# device, which is exactly how the first build failed: the package builds fine,
+# and only breaks when something imports it. ecdsa and pyaes are needed at import
+# time by CardConnector's chain; Cryptodome is used lazily by the certificate
+# validator; OpenSSL is guarded by try/except and genuinely optional.
+for m in ecdsa pyaes Cryptodome; do
+  [ -d "$SP/$m" ] && ok "$m" || bad "$m missing - pysatochip will fail to import"
+done
+
+echo
 echo "=== applets the installer offers ==="
 ls /work/os/output/target/opt/javacard-cap/*.cap 2>/dev/null | sed 's|.*/|  |' \
   || bad "no .cap files"
