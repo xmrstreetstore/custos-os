@@ -63,21 +63,43 @@ for f in /usr/bin/smartcard-selftest /etc/init.d/S90selftest; do
   if [ -e "$T$f" ]; then bad "$f is back - the abandoned diagnostic should not ship"
   else ok "no $f"; fi
 done
-# Radios and remote access have no place in a release image. The Pi Zero 1.3 has
-# no radio hardware at all, but the same rootfs is built for boards that do.
-for f in /usr/sbin/dropbear /usr/sbin/wpa_supplicant /usr/sbin/hciconfig; do
-  if [ -e "$T$f" ]; then bad "$f present in a release rootfs"
-  else ok "no $f"; fi
-done
+# Remote access has no place in a *release* image. A dev image ships dropbear and
+# wpa_supplicant on purpose - that is what it is for - so this has to respect the
+# mode, exactly as this script's own header warns. Getting that wrong makes the
+# check cry wolf, and the day a release image really does carry a radio blob,
+# nobody will look.
+if [ "$MODE" = release ]; then
+  for f in /usr/sbin/dropbear /usr/sbin/wpa_supplicant; do
+    if [ -e "$T$f" ]; then bad "$f present in a release rootfs"
+    else ok "no $f"; fi
+  done
+else
+  for f in /usr/sbin/dropbear /usr/sbin/wpa_supplicant; do
+    [ -e "$T$f" ] && ok "$f (expected in a dev image)" || echo "  [note] $f absent"
+  done
+fi
+# Bluetooth is off in both: the SEC1210 owns the UART that BT would take.
+if [ -e "$T/usr/sbin/hciconfig" ]; then bad "bluetooth tooling present"
+else ok "no bluetooth tooling"; fi
 
 echo
 echo "=== branding ==="
 check_path "$T/opt/src/seedsigner/resources/img/logo_black_240.png" "boot logo present"
-# The splash positions the version string from this constant. If the artwork and
-# the constant disagree, the version number is drawn across the logo.
-lh=$(grep -oE '^\s*logo_height = [0-9]+' "$T/opt/src/seedsigner/views/screensaver.py" 2>/dev/null | grep -oE '[0-9]+')
-if [ "$lh" = "140" ]; then ok "logo_height = $lh (matches the Custos artwork)"
-else bad "logo_height = ${lh:-unset}, expected 140 - version text will overlap the logo"; fi
+# The splash is meant to be the logo and nothing else - the wordmark is part of
+# the artwork. This used to assert logo_height=140, which positioned a version
+# string away from the logo; that string was then removed outright, so the
+# constant went with it and the check failed a correct image. Assert what the
+# screen should actually contain instead.
+# Comments are stripped first. The file explains in prose that it draws no
+# sponsor block, and matching that sentence failed a correct image on the first
+# run of this very check.
+SS="$T/opt/src/seedsigner/views/screensaver.py"
+if grep -vE '^\s*#' "$SS" 2>/dev/null \
+     | grep -qE 'sponsor|Human Rights|version_text|self\.version'; then
+  bad "the splash draws something besides the logo"
+else
+  ok "splash is the logo alone (no version string, no sponsor block)"
+fi
 
 echo
 echo "=== the app itself ==="

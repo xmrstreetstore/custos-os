@@ -45,12 +45,23 @@ fail=0
 wants='dtparam=spi=on dtoverlay=disable-bt dtoverlay=mmc'
 if [ "$MODE" = release ]; then
   wants="$wants dtoverlay=disable-wifi"
-else
-  wants="$wants dtoverlay=dwc2,dr_mode=peripheral"
 fi
 for want in $wants; do
   if grep -qxF "$want" "$tmp"; then printf "  [ok]   %s\n" "$want"; else printf "  [FAIL] %s\n" "$want"; fail=1; fi
 done
+
+# The USB gadget overlay, in whichever form the board uses. pi0-dev pins
+# dr_mode=peripheral because the gadget is its only way in; pi4-dev leaves dwc2
+# dual-role so a keyboard on an OTG adapter still works, and reaches the shell
+# over its own ethernet instead. Demanding the pi0 spelling failed a pi4 image
+# that was configured exactly as intended.
+if [ "$MODE" = dev ]; then
+  if grep -qE '^dtoverlay=dwc2(,|$)' "$tmp"; then
+    printf "  [ok]   %s\n" "$(grep -E '^dtoverlay=dwc2(,|$)' "$tmp" | head -1)"
+  else
+    printf "  [FAIL] %s\n" "no dtoverlay=dwc2"; fail=1
+  fi
+fi
 if [ "$MODE" = dev ] && grep -qxF 'dtoverlay=disable-wifi' "$tmp"; then
   printf "  [FAIL] %s\n" "dev image disables wifi - SSH over wifi will not work"; fail=1
 fi
