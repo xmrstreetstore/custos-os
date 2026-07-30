@@ -54,11 +54,20 @@ if [ -d "$T/opt/javacard-cap" ]; then
 fi
 
 echo
-echo "=== self-test (opt-in diagnostic) ==="
+echo "=== nothing here that should not be ==="
+# The card-writing self-test was abandoned - three attempts never produced a
+# result file, and the feature it was meant to prove now reports its own errors
+# on screen. Assert it stays gone: it is an init script, so leaving it behind
+# means shipping boot-time code on a signing device for no reason.
 for f in /usr/bin/smartcard-selftest /etc/init.d/S90selftest; do
-  if [ ! -e "$T$f" ]; then bad "$f missing"
-  elif [ ! -x "$T$f" ]; then bad "$f present but NOT executable (would fail silently at boot)"
-  else ok "$f (executable)"; fi
+  if [ -e "$T$f" ]; then bad "$f is back - the abandoned diagnostic should not ship"
+  else ok "no $f"; fi
+done
+# Radios and remote access have no place in a release image. The Pi Zero 1.3 has
+# no radio hardware at all, but the same rootfs is built for boards that do.
+for f in /usr/sbin/dropbear /usr/sbin/wpa_supplicant /usr/sbin/hciconfig; do
+  if [ -e "$T$f" ]; then bad "$f present in a release rootfs"
+  else ok "no $f"; fi
 done
 
 echo

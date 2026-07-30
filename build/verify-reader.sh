@@ -20,16 +20,32 @@ if grep -q '^CONFIG_SERIAL_AMBA_PL011=y' "$K/.config" 2>/dev/null; then
 else
   bad "PL011 driver absent - the SEC1210 can never be opened"
 fi
-# A console here would fight the reader for the same port, in both directions.
-if grep -q '^CONFIG_SERIAL_AMBA_PL011_CONSOLE=y' "$K/.config" 2>/dev/null; then
-  bad "a kernel console is on the reader's UART"
+# A console on ttyAMA0 would fight the reader for the same port, in both
+# directions - but only if one is actually registered, and building the driver
+# in does not register anything. Stock builds PL011_CONSOLE=y on pi2, pi02w and
+# pi4; only pi0 leaves it out. Judging the image by that symbol failed the pi4
+# image for something upstream ships and the reader never notices, so check the
+# two places a console actually gets named instead.
+CMDLINE=/work/os/output/images/rpi-firmware/cmdline.txt
+grep -q '^CONFIG_SERIAL_AMBA_PL011_CONSOLE=y' "$K/.config" 2>/dev/null \
+  && echo "  [note] PL011_CONSOLE is built in (stock does this) - harmless unless named below" \
+  || ok "PL011 console not even built"
+if grep -qE 'console=(ttyAMA|ttyS|serial)' "$CMDLINE" 2>/dev/null; then
+  bad "cmdline.txt puts a console on a serial port: $(cat "$CMDLINE")"
 else
-  ok "no kernel console on ttyAMA0"
+  ok "cmdline.txt names no serial console: $(cat "$CMDLINE" 2>/dev/null)"
 fi
-if grep -q 'console=' /work/os/output/images/rpi-firmware/cmdline.txt 2>/dev/null; then
-  bad "cmdline.txt puts a console on a serial port"
+# The devicetree's stdout-path is the other way in, and the one that bites when
+# cmdline.txt is bare: the rpi dtbs point it at serial0. The kernel consults it
+# only as a fallback though - of_console_check() returns early once
+# console_set_on_cmdline is set, so any console= at all, even console=tty1,
+# takes the devicetree out of the running.
+if grep -q 'console=' "$CMDLINE" 2>/dev/null; then
+  ok "a console= is set, so the devicetree's stdout-path is ignored"
+elif grep -aq 'serial0:' /work/os/output/images/*.dtb 2>/dev/null; then
+  bad "no console= in cmdline.txt, so the dtb's stdout-path will claim serial0"
 else
-  ok "cmdline.txt claims no console"
+  ok "no console anywhere"
 fi
 grep -q '^enable_uart=1' /work/os/output/images/rpi-firmware/config.txt 2>/dev/null \
   && ok "enable_uart=1 in config.txt" \
