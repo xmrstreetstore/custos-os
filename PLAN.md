@@ -118,9 +118,13 @@ We bundle **SeedKeeper only**:
 | File | Size | SHA256 (verified against upstream manifest) |
 |---|---|---|
 | `SeedKeeper-0.2-official.cap` | 93,554 | `28dbae3c…03dabcd` |
-| `SeedKeeper-Ndef-v0.2-0.1.cap` | 125,154 | `ef776360…aa632c9b` |
 
-~219 KB against a 50 MB image. Adding another applet later is dropping in a file.
+~94 KB against a 50 MB image. Adding another applet later is dropping in a file.
+
+The NDEF variant was bundled at first and dropped: it exists for contactless use and
+this device has no NFC, so it only added a second near-identically named entry to the
+install menu. See `seedsigner/javacard-cap/README.md` for its hash and how to restore
+it if a PN532 is ever fitted.
 
 **These are third-party binaries being flashed onto a card that will hold keys.**
 Keep `javacard-cap.sha256` alongside them, keep provenance recorded, and re-verify

@@ -43,8 +43,7 @@ echo "branch: $(git -C /work/os rev-parse --abbrev-ref HEAD)"
 echo "head:   $(git -C /work/os log --oneline -1)"
 grep -E 'PYSATOCHIP|PYSCARD|PYGP|CCID_SEC1210' /work/os/opt/pi0/configs/pi0_defconfig
 
-echo "== selftest staged =="
-ls -l /work/os/opt/rootfs-overlay/usr/bin/smartcard-selftest \
-      /work/os/opt/rootfs-overlay/etc/init.d/S90selftest
+echo "== overlay staged =="
+ls -1 /work/os/opt/rootfs-overlay/etc/init.d/
 
 echo "STAGE-OK"
