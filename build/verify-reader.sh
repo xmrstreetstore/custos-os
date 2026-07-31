@@ -52,6 +52,22 @@ grep -q '^enable_uart=1' /work/os/output/images/rpi-firmware/config.txt 2>/dev/n
   || bad "enable_uart=1 missing - UART clock not guaranteed"
 
 echo
+echo "=== the kernel can carry pcscd's IPC ==="
+# pcsc-lite is built entirely on AF_UNIX: pcscd serves /run/pcscd/pcscd.comm
+# and libpcsclite (so pyscard) connects to it. Without CONFIG_UNIX the very
+# first socket() call fails and pcscd dies at pcscdaemon.c:732, having already
+# opened the reader - so tty:ok, reader configured, and still no service.
+#
+# Nothing else here would notice: the chroot tests below run on the build
+# host's kernel, which has AF_UNIX, so they pass while the device cannot work.
+# That is exactly how this shipped three times.
+if grep -q '^CONFIG_UNIX=y' "$K/.config" 2>/dev/null; then
+  ok "CONFIG_UNIX=y  (pcscd can create its client socket)"
+else
+  bad "CONFIG_UNIX not set - pcscd dies in InitializeSocket, SCARD_E_NO_SERVICE"
+fi
+
+echo
 echo "=== the daemon survives a machine with no USB ==="
 if grep -q 'no USB support: continuing with serial readers only' "$T/usr/sbin/pcscd" 2>/dev/null; then
   ok "pcscd carries the no-suicide patch"
@@ -110,6 +126,38 @@ if command -v qemu-arm-static >/dev/null 2>&1; then
     || bad "pcscd never looked for the SEC1210"
   kill "$pcscd_pid" 2>/dev/null
   sleep 1
+
+  # Everything above ran pcscd with --foreground, which is *not* how the device
+  # runs it: _start_pcscd() execs the binary bare, so it daemonises. That path
+  # has its own failure protocol - the parent's exit status is just the byte the
+  # child wrote to the startup pipe (1 = at_exit() was reached, 2 = the child
+  # died without writing) - and none of it is exercised in the foreground. The
+  # difference is not academic: daemonising also redirects logging to syslog,
+  # which this image has no daemon for, so a fault here is silent by
+  # construction. Test the mode that ships.
+  rm -rf "$T/run/pcscd"
+  chroot "$T" /usr/bin/qemu-arm-static /usr/sbin/pcscd > /tmp/pcscd-daemon.log 2>&1
+  rc=$?
+  if [ $rc -eq 0 ]; then
+    ok "daemonises cleanly (exit 0)"
+  else
+    bad "pcscd exits $rc when daemonised - the device will get SCARD_E_NO_SERVICE"
+    [ -s /tmp/pcscd-daemon.log ] && sed 's/^/         /' /tmp/pcscd-daemon.log
+  fi
+  [ -S "$T/run/pcscd/pcscd.comm" ] \
+    && ok "daemonised pcscd left a client socket" \
+    || bad "daemonised pcscd created no socket at /run/pcscd/pcscd.comm"
+  # The app reads this to tell "already up" from "must start it", so a daemon
+  # that leaves no pid file makes that decision on stale information.
+  [ -f "$T/run/pcscd/pcscd.pid" ] \
+    && ok "pid file written" \
+    || bad "no pid file - _start_pcscd cannot tell a live daemon from a stale socket"
+  # pcscd writes strlen(pid)+1 bytes, so the file ends in a NUL that bash
+  # complains about in a command substitution. Strip it rather than let a
+  # warning sit in otherwise clean output, where it reads like a fault.
+  kill "$(tr -d '\0' < "$T/run/pcscd/pcscd.pid" 2>/dev/null)" 2>/dev/null
+  rm -rf "$T/run/pcscd"
+
   umount "$T/dev" 2>/dev/null
 else
   echo "  (qemu unavailable - skipped the live daemon test)"

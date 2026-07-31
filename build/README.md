@@ -57,3 +57,40 @@ settings, and **no brcm firmware blobs anywhere in the rootfs**.
 
 That last one is the point: "there is no radio" is the most important claim this
 image makes, so it fails loudly rather than being believed.
+
+## The checks that run things rather than read them
+
+Static "is it present" checks have passed while the device did not work more
+often than the images have been wrong. These four execute something:
+
+| Script | What it actually does |
+|---|---|
+| `verify-imports.sh` | imports each module with the target's ARM python under qemu |
+| `verify-crypto.sh` | runs FIPS 81 / FIPS 197 / RFC 4493 / RFC 2202 vectors |
+| `verify-reader.sh` | starts `pcscd` both foreground *and* daemonised, and asserts `CONFIG_UNIX=y` |
+| `verify-seed-layout.sh` | saves a seed and reads it back through `export_mnemonic` |
+
+The last two exist because of faults that shipped. pcscd died in
+`InitializeSocket()` on pi0 for three builds because the kernel had no AF_UNIX
+and every check ran on the build host's kernel, which has it.
+
+`verify-seed-layout.sh` guards the worst failure mode in the project: a wrong
+byte in the secret layout breaks nothing visible. The card accepts it, the write
+reports success, and it is discovered only by someone trying to restore a wallet
+from a backup that cannot be read. Run it against the target rootfs, not the
+host - the entropy and master seed come from embit, and it is the *shipped*
+embit that has to agree.
+
+All six, after a build:
+
+```powershell
+foreach ($s in "verify.sh","verify-img.sh","verify-app.sh",`
+               "verify-imports.sh","verify-crypto.sh","verify-reader.sh",`
+               "verify-seed-layout.sh") {
+  docker run --rm --privileged -v ssbuild:/work -v "${PWD}/../build:/s:ro" `
+    --entrypoint bash ssos-builder /s/$s
+}
+```
+
+`verify-reader.sh` and `verify-seed-layout.sh` need `--privileged` (bind-mounting
+`/dev` into the chroot, and qemu).
