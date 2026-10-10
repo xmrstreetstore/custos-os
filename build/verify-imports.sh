@@ -76,7 +76,9 @@ r = read_dice(img)
 assert r.values == vals, (r.values, vals)
 print("read", len(r.values), "dice correctly")
 PY
-PYTHONPATH=/opt/src run_import "read a photo of dice" "$DICE_CHECK"
+# qemu -L only redirects the interpreter, not PYTHONPATH: name the app's path
+# inside the target tree, or python looks for /opt/src on the build host.
+PYTHONPATH="$T/opt/src" run_import "read a photo of dice" "$DICE_CHECK"
 
 echo
 [ $fail -eq 0 ] && echo "IMPORT-VERIFY-OK" || echo "IMPORT-VERIFY-FAILED"
