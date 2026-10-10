@@ -82,6 +82,38 @@ if grep -q '^DEVICENAME.*ttyAMA0:SEC1210URT' "$T/etc/reader.conf.d/sec1210" 2>/d
 else
   bad "reader.conf.d/sec1210 missing or wrong"
 fi
+
+echo
+echo "=== the PN532 NFC reader can be reached ==="
+# The PN532 sits on I2C bus 1 and reaches pcscd as a second reader through
+# ifdnfc + libnfc. Each link below fails silently on the device: the reader just
+# stays inactive, and the screen can only say nfc:off.
+grep -q '^CONFIG_I2C_BCM2835=y' "$K/.config" 2>/dev/null \
+  && ok "CONFIG_I2C_BCM2835=y  (the I2C controller has a driver)" \
+  || bad "I2C_BCM2835 not built in - no /dev/i2c-1, the PN532 is unreachable"
+grep -q '^CONFIG_I2C_CHARDEV=y' "$K/.config" 2>/dev/null \
+  && ok "CONFIG_I2C_CHARDEV=y  (libnfc can open /dev/i2c-1)" \
+  || bad "I2C_CHARDEV not built in - libnfc has no device node to open"
+grep -q '^dtparam=i2c_arm=on' /work/os/output/images/rpi-firmware/config.txt 2>/dev/null \
+  && ok "dtparam=i2c_arm=on in config.txt" \
+  || bad "i2c_arm not enabled in config.txt - bus 1 is never brought up"
+[ -f "$T/usr/lib/libifdnfc.so" ] \
+  && ok "ifdnfc driver present" \
+  || bad "/usr/lib/libifdnfc.so missing"
+ls "$T"/usr/lib/libnfc.so* >/dev/null 2>&1 \
+  && ok "libnfc present" \
+  || bad "libnfc missing"
+grep -q '^LIBPATH.*/usr/lib/libifdnfc.so' "$T/etc/reader.conf.d/libifdnfc" 2>/dev/null \
+  && ok "reader.conf.d/libifdnfc declares the NFC reader" \
+  || bad "reader.conf.d/libifdnfc missing or wrong"
+# The app sends this exact connstring (NFC_CONNSTRING in helpers/seedkeeper.py);
+# libnfc.conf is what makes the device known to libnfc at all.
+grep -q 'pn532_i2c:/dev/i2c-1' "$T/etc/nfc/libnfc.conf" 2>/dev/null \
+  && ok "libnfc.conf points at pn532_i2c:/dev/i2c-1" \
+  || bad "/etc/nfc/libnfc.conf missing or wrong"
+grep -rq 'pn532_i2c' "$T"/usr/lib/libnfc.so* 2>/dev/null \
+  && ok "libnfc was built with the pn532_i2c driver" \
+  || bad "libnfc lacks the pn532_i2c driver"
 [ -f "$T/usr/lib/pcsc/drivers/serial/libccidtwin.so" ] \
   && ok "serial CCID driver present" \
   || bad "libccidtwin.so missing"
@@ -124,7 +156,34 @@ if command -v qemu-arm-static >/dev/null 2>&1; then
   grep -q 'SEC1210' /tmp/pcscd-verify.log \
     && ok "pcscd tried to bring up SEC1210" \
     || bad "pcscd never looked for the SEC1210"
+  # Loading the NFC driver must not cost the SEC1210 anything: the daemon is
+  # already proven alive above with both readers configured.
+  grep -q 'IFD-NFC' /tmp/pcscd-verify.log \
+    && ok "pcscd loaded the IFD-NFC reader alongside it" \
+    || bad "pcscd never loaded the IFD-NFC reader"
   kill "$pcscd_pid" 2>/dev/null
+  sleep 1
+
+  # Settings > Hardware > Smartcard interfaces switches readers off through
+  # pcsc-lite's own name filter (_ignored_readers in helpers/seedkeeper.py). It
+  # only exists when pcsc-lite was built with FILTER_NAMES, and nothing else
+  # would notice its absence: the setting would just do nothing.
+  rm -rf "$T/run/pcscd"
+  PCSCLITE_FILTER_IGNORE_READER_NAMES="SEC1210:IFD-NFC" \
+    chroot "$T" /usr/bin/qemu-arm-static /usr/sbin/pcscd --foreground --debug \
+    > /tmp/pcscd-filter.log 2>&1 &
+  filter_pid=$!
+  sleep 6
+  grep -q 'contains "SEC1210": ignored' /tmp/pcscd-filter.log \
+    && ok "reader filter drops SEC1210 when it is switched off" \
+    || bad "PCSCLITE_FILTER_IGNORE_READER_NAMES ignored - SEC1210 cannot be switched off"
+  grep -q 'contains "IFD-NFC": ignored' /tmp/pcscd-filter.log \
+    && ok "reader filter drops IFD-NFC when it is switched off" \
+    || bad "PCSCLITE_FILTER_IGNORE_READER_NAMES ignored - NFC cannot be switched off"
+  kill -0 "$filter_pid" 2>/dev/null \
+    && ok "daemon stays up with every reader filtered out" \
+    || bad "daemon died with every reader filtered out"
+  kill "$filter_pid" 2>/dev/null
   sleep 1
 
   # Everything above ran pcscd with --foreground, which is *not* how the device
