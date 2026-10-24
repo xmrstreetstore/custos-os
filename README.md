@@ -3,14 +3,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/xmrstreetstore/custos-os/releases"><img alt="v0.1 beta" src="https://img.shields.io/badge/release-v0.1_beta-E8B33A?style=for-the-badge&labelColor=000000"/></a>
-  <img alt="Bitcoin only" src="https://img.shields.io/badge/bitcoin-only-E8B33A?style=for-the-badge&labelColor=000000"/>
-  <img alt="No Wi-Fi, no Bluetooth" src="https://img.shields.io/badge/radios-no_wi--fi_·_no_bluetooth-E8B33A?style=for-the-badge&labelColor=000000"/>
-  <img alt="Contact or NFC" src="https://img.shields.io/badge/card-contact_or_NFC-E8B33A?style=for-the-badge&labelColor=000000"/>
-  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/licence-MIT-E8B33A?style=for-the-badge&labelColor=000000"/></a>
-</p>
-
-<p align="center">
   <b><a href="https://custos-os.com">custos-os.com</a></b> &nbsp;·&nbsp;
   <a href="#install">Install</a> &nbsp;·&nbsp;
   <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
