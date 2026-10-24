@@ -1,59 +1,87 @@
 <p align="center">
-  <img alt="Custos OS" src="branding/custos-os-source.png" width="180"/>
+  <a href="https://custos-os.com"><img alt="Custos OS — Stateless by design. Your seed lives on a card. Your signer forgets it." src="branding/readme-banner.png" width="100%"/></a>
 </p>
-<h1 align="center">Custos OS</h1>
-<p align="center"><b>Stateless by design.</b><br/>
-An air-gapped bitcoin signer that keeps your seed on a PIN-protected SeedKeeper
-smartcard, and remembers nothing once it powers off.</p>
-<p align="center"><a href="https://custos-os.com">custos-os.com</a></p>
+
+<p align="center">
+  <a href="https://github.com/xmrstreetstore/custos-os/releases"><img alt="v0.1 beta" src="https://img.shields.io/badge/release-v0.1_beta-E8B33A?style=for-the-badge&labelColor=000000"/></a>
+  <img alt="Bitcoin only" src="https://img.shields.io/badge/bitcoin-only-E8B33A?style=for-the-badge&labelColor=000000"/>
+  <img alt="No Wi-Fi, no Bluetooth" src="https://img.shields.io/badge/radios-no_wi--fi_·_no_bluetooth-E8B33A?style=for-the-badge&labelColor=000000"/>
+  <img alt="Contact or NFC" src="https://img.shields.io/badge/card-contact_or_NFC-E8B33A?style=for-the-badge&labelColor=000000"/>
+  <a href="LICENSE"><img alt="MIT" src="https://img.shields.io/badge/licence-MIT-E8B33A?style=for-the-badge&labelColor=000000"/></a>
+</p>
+
+<p align="center">
+  <b><a href="https://custos-os.com">custos-os.com</a></b> &nbsp;·&nbsp;
+  <a href="#install">Install</a> &nbsp;·&nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
+  <a href="#security-model">Security</a> &nbsp;·&nbsp;
+  <a href="#hardware">Hardware</a> &nbsp;·&nbsp;
+  <a href="#building-from-source">Build</a>
+</p>
 
 ---
 
-Custos OS is [SeedSigner](https://seedsigner.com) with SeedKeeper smartcard
-support. Insert the card in a SEC1210 HAT or hold it to a PN532 NFC reader, enter
-your PIN, and the seed is read straight into memory to sign. Pull the power and it
-is gone. Everything outside the smartcard code is stock SeedSigner, on purpose.
+**Custos OS is an air-gapped bitcoin signer built on [SeedSigner](https://seedsigner.com).**
+It reads your seed from a PIN-protected SeedKeeper smartcard, by contact or NFC,
+signs your transaction, and keeps nothing once it powers off. Everything else is
+stock SeedSigner, on purpose.
 
-> **v0.1 is a beta.** It runs on a Raspberry Pi Zero v1.3 and has been tested on
-> real hardware. Keep a second backup of any seed you put on a card.
+> [!NOTE]
+> **v0.1 is a beta.** It runs on a Raspberry Pi Zero v1.3 and has been tested on real
+> hardware. Keep a second backup of any seed you put on a card.
 
-## Repositories
+<p align="center">
+  <img alt="The Custos OS interface: home, load a seed, tap a card, unlock, smartcard tools, back up to a card" src="branding/readme-screens.png" width="100%"/>
+</p>
+<p align="center"><sub>Rendered from the Custos OS source at the device's 320×240 resolution.</sub></p>
 
-| Repo | What |
+## What it adds
+
+SeedSigner never stores your seed, so you bring it every time: as words, as a
+SeedQR, or with Custos, on a SeedKeeper card that only opens with your PIN.
+
+| Feature | What it does |
 |---|---|
-| **custos-os** (this one) | Release images, build scripts, verifiers, branding |
-| [custos-seedsigner](https://github.com/xmrstreetstore/custos-seedsigner) | The app: fork of SeedSigner with the smartcard features |
-| [custos-seedsigner-os](https://github.com/xmrstreetstore/custos-seedsigner-os) | The OS: fork of SeedSigner OS with the smartcard stack |
+| **Load a seed from a card** | 12 or 24 words go straight into memory. If the card also holds a passphrase, you choose whether to use it. Nothing is written to the device. |
+| **Save a seed to a card** | Labelled with its fingerprint, and read back to check the write. A BIP-39 passphrase is saved with the seed; the confirm screen says so. |
+| **Insert it or tap it** | SEC1210 contact slot or PN532 NFC reader. A live connection bar shows when a tapped card is steady enough to use. |
+| **A real PIN** | 4–16 characters on a full keyboard, letters and symbols included, masked on screen. |
+| **Five strikes** | Each wrong PIN shows the tries left. A card set up on Custos wipes itself after the fifth. |
+| **Set up your own cards** | Install or remove the SeedKeeper applet from a file bundled in the image and checked against the upstream hash, and set a new card's PIN. Nothing is downloaded. |
 
-Clone with submodules:
+## How it works
 
-```bash
-git clone --recurse-submodules https://github.com/xmrstreetstore/custos-os.git
-```
+1. **Power on.** The signer boots its image into RAM, with no network and no seed.
+2. **Present your card.** Pick *From SeedKeeper*, then insert the card or hold it to the reader.
+3. **Unlock and choose.** Enter your PIN, pick the seed, check its fingerprint against your wallet.
+4. **Scan, sign, power off.** Scan the transaction QR, review it, show the signed QR back. Pull the power and the seed is gone.
 
-## What it adds to SeedSigner
+Wallets: the same as stock SeedSigner, through QR-code PSBTs — Sparrow, Nunchuk,
+Specter Desktop, BlueWallet and others.
 
-- **Load a seed from a SeedKeeper card.** If the card also holds a passphrase, you
-  choose whether to use it.
-- **Save a seed to a card,** labelled with its fingerprint and read back to check
-  the write. A BIP-39 passphrase is saved with the seed; the confirm screen says so.
-- **Contact or NFC,** with a live connection bar for a tapped card.
-- **Full-keyboard PIN,** 4–16 characters, masked on screen.
-- **Five strikes:** each wrong PIN shows the attempts left, and a card set up on
-  Custos wipes itself after the fifth.
-- **Card setup:** install or remove the SeedKeeper applet (bundled, hash-checked)
-  and set a new card's PIN.
-- **Reader selection:** switch either reader off in Settings › Hardware.
+## Security model
+
+- **Nothing on the device.** Seeds exist only in RAM while the signer is on.
+- **No network, ever.** Wi-Fi and Bluetooth are disabled in the build, no radio drivers
+  or Broadcom firmware are included (`build/verify.sh` fails if any appear), and the
+  Pi Zero v1.3 has no wireless chip. Transactions move by QR code.
+- **NFC, honestly.** It is the one RF link: a few centimetres, card only, and optional.
+  Switch it off under Settings › Hardware › Smartcard interfaces, or don't fit it.
+- **A small, reviewable change.** Only the card features were ported onto stock
+  SeedSigner, rather than adopting a fork hundreds of commits ahead.
+- **Card state, not guesses.** Every card operation is confirmed by asking the card.
+  If it cannot be confirmed, Custos says so instead of showing success.
+- **Can't brick your card.** Uninstall only offers Satochip-family applets.
 
 ## Hardware
 
-- Raspberry Pi Zero v1.3 (no Wi-Fi or Bluetooth on the board)
-- SEC1210 smartcard HAT, and/or a PN532 NFC reader on I2C
-- 2.8" 320×240 display (the 1.3" 240×240 SeedSigner panel also works) and a Pi camera
-- A JavaCard running the SeedKeeper applet (e.g. J3H145, J3R180). Custos can install
-  the applet itself.
-
-Parts are available from [xmrstreet.store](https://xmrstreet.store/product-category/smartcards-and-seedkeeper/).
+| Part | Notes |
+|---|---|
+| **Raspberry Pi Zero v1.3** | The board without Wi-Fi or Bluetooth |
+| **SEC1210 smartcard HAT** | Contact reader — [Smartcard HAT](https://xmrstreet.store/product/smartcard-hat-for-seedsigner/) · [Plus smartcard hat](https://xmrstreet.store/product/smartcard-combo-pcb-hat/) |
+| **PN532 NFC reader** | Optional, on I2C |
+| **2.8″ 320×240 display + Pi camera** | The 1.3″ 240×240 SeedSigner panel also works |
+| **A SeedKeeper card** | Any JavaCard running the SeedKeeper applet, e.g. J3H145 or J3R180 — [Smartcards & SeedKeeper](https://xmrstreet.store/product-category/smartcards-and-seedkeeper/) |
 
 ## Install
 
@@ -67,20 +95,25 @@ Parts are available from [xmrstreet.store](https://xmrstreet.store/product-categ
 3. Flash it to a microSD card with Raspberry Pi Imager or balenaEtcher, put it in the
    Pi Zero and power on.
 
-## Security model
+## Repositories
 
-- **Nothing on the device.** Seeds exist only in RAM while the signer is on.
-- **No network.** Wi-Fi and Bluetooth are disabled in the build, no radio drivers or
-  Broadcom firmware are included (`build/verify.sh` fails if any appear), and the
-  Pi Zero v1.3 has no wireless chip. Transactions move by QR code.
-- **NFC is the one RF link:** a few centimetres, card only, and optional.
-- **Card state, not guesses.** Every card operation is confirmed by asking the card;
-  if it cannot be confirmed, Custos says so instead of showing success.
+| Repo | What |
+|---|---|
+| **custos-os** (this one) | Release images, build scripts, verifiers, branding |
+| [custos-seedsigner](https://github.com/xmrstreetstore/custos-seedsigner) | The app: fork of SeedSigner with the smartcard features |
+| [custos-seedsigner-os](https://github.com/xmrstreetstore/custos-seedsigner-os) | The OS: fork of SeedSigner OS with the smartcard stack |
+
+```bash
+git clone --recurse-submodules https://github.com/xmrstreetstore/custos-os.git
+```
+
+On Windows, run `git config --global core.longpaths true` first: SeedSigner OS's
+buildroot has paths longer than Windows allows by default.
 
 ## Building from source
 
 The build runs the stock SeedSigner OS buildroot inside a Docker volume. The steps,
-and the pitfalls, are in [build/README.md](build/README.md):
+and the pitfalls, are in [build/README.md](build/README.md).
 
 | Script | Does |
 |---|---|
@@ -95,8 +128,9 @@ and the pitfalls, are in [build/README.md](build/README.md):
 | `build/verify-seed-layout.sh` | Writes a seed the way the card stores it and reads it back, under qemu (needs `--privileged`) |
 | `build/verify-game.sh` | Only for the separate combined image with the Orange Kingdom game; not used for Custos releases |
 
-`PLAN.md` is the original porting plan, kept for history. Some of it (SEC1210 only,
-no NFC) has since changed.
+`PLAN.md` is the original porting plan, kept for history; some of it (SEC1210 only,
+no NFC) has since changed. The README artwork is generated by
+`branding/readme_art.py`.
 
 ## Licence and credits
 
@@ -108,6 +142,12 @@ licensed AGPL-3.0; its source is the
 Built on [SeedSigner](https://github.com/SeedSigner/seedsigner) and
 [SeedSigner OS](https://github.com/SeedSigner/seedsigner-os). Smartcard support
 ported from [3rdIteration's fork](https://github.com/3rdIteration/seedsigner).
-SeedKeeper by [Satochip](https://satochip.io).
+SeedKeeper by [Satochip](https://satochip.io). Custos OS is an independent project,
+not affiliated with SeedSigner or Satochip.
 
-Custos OS is an independent project, not affiliated with SeedSigner or Satochip.
+<p align="center">
+  <br/>
+  <a href="https://custos-os.com"><img alt="Custos OS" src="branding/custos-mark.png" width="72"/></a>
+  <br/>
+  <sub><b>CUSTOS OS</b> · Stateless by design</sub>
+</p>
