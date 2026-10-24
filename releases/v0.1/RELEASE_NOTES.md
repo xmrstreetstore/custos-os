@@ -15,10 +15,12 @@ Verify with `sha256sum -c SHA256SUMS`, then flash to a microSD card.
 
 | Repo | Tag | Commit |
 |---|---|---|
-| custos-seedsigner | `v0.1` | `f84d215c` |
-| custos-seedsigner-os | `v0.1` | `9388c8f` |
+| custos-seedsigner | `v0.1` | `d42afed8` |
+| custos-seedsigner-os | `v0.1` | `666eda1` |
 
-The image's `version.json` reports `f84d215`. Seven verifiers passed on this build
+The image's `version.json` reports `f84d215`: the image was built before the commit
+messages were tidied, which changed the commit IDs but not the code. `f84d215c` and
+`d42afed8` (app) and `9388c8f` and `666eda1` (OS) have identical file trees. Seven verifiers passed on this build
 (`verify`, `verify-img`, `verify-app`, `verify-imports`, `verify-crypto`,
 `verify-reader`, `verify-seed-layout`).
 
