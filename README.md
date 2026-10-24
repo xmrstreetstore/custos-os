@@ -72,10 +72,10 @@ Specter Desktop, BlueWallet and others.
 | Part | Notes |
 |---|---|
 | **Raspberry Pi Zero v1.3** | The board without Wi-Fi or Bluetooth |
-| **SEC1210 smartcard HAT** | Contact reader — [Smartcard HAT](https://xmrstreet.store/product/smartcard-hat-for-seedsigner/) · [Plus smartcard hat](https://xmrstreet.store/product/smartcard-combo-pcb-hat/) |
+| **SEC1210 smartcard HAT** | Contact reader |
 | **PN532 NFC reader** | Optional, on I2C |
 | **2.8″ 320×240 display + Pi camera** | The 1.3″ 240×240 SeedSigner panel also works |
-| **A SeedKeeper card** | Any JavaCard running the SeedKeeper applet, e.g. J3H145 or J3R180 — [Smartcards & SeedKeeper](https://xmrstreet.store/product-category/smartcards-and-seedkeeper/) |
+| **A SeedKeeper card** | Any JavaCard running the SeedKeeper applet, e.g. J3H145 or J3R180 |
 
 ## Install
 
