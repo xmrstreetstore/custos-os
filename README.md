@@ -11,6 +11,8 @@
   <a href="#building-from-source">Build</a>
 </p>
 
+<p align="center"><i>custōs</i> · Latin for <b>guardian, keeper</b>, the root of the word <i>custody</i></p>
+
 ---
 
 **Custos OS is an air-gapped bitcoin signer built on [SeedSigner](https://seedsigner.com).**
