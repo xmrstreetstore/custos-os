@@ -9,7 +9,9 @@ and saves seeds on SeedKeeper smartcards, by contact (SEC1210 HAT) or NFC (PN532
 |---|---|
 | `custos.pi0.img` (50 MB) | `f1993c7963f4bf5d96d7f86bc55c362cfb9acfa6b82fb38704cb9c522da8bb2b` |
 
-Verify with `sha256sum -c SHA256SUMS`, then flash to a microSD card.
+Verify the signature with `gpg --verify SHA256SUMS.asc SHA256SUMS` (key fingerprint
+`E8C0 F756 E611 3813 7DFF 39BE F1FD 97FD 5D2A AA2C`), then the image with
+`sha256sum -c SHA256SUMS`, then flash to a microSD card. Full steps are in the README.
 
 ## Built from
 

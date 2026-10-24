@@ -77,15 +77,56 @@ Specter Desktop, BlueWallet and others.
 
 ## Install
 
-1. Download `custos.pi0.img` and `SHA256SUMS` from the
-   [latest release](https://github.com/xmrstreetstore/custos-os/releases).
-2. Check the image:
-   ```bash
-   sha256sum -c SHA256SUMS
-   ```
-   On Windows: `Get-FileHash custos.pi0.img` and compare with `SHA256SUMS`.
-3. Flash it to a microSD card with Raspberry Pi Imager or balenaEtcher, put it in the
-   Pi Zero and power on.
+### 1. Download
+
+From the [latest release](https://github.com/xmrstreetstore/custos-os/releases),
+download all three files:
+
+- `custos.pi0.img` — the image
+- `SHA256SUMS` — its checksum
+- `SHA256SUMS.asc` — the checksum, signed with the xmrstreetstore key
+
+### 2. Verify the signature
+
+This proves the checksum file was made by us and not swapped along with the image.
+
+Import the signing key. It is the same key in all of these places, so get it from
+one and compare the fingerprint with another:
+[`keys/xmrstreetstore.asc`](keys/xmrstreetstore.asc) in this repo,
+[github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg), and
+[custos-os.com](https://custos-os.com).
+
+```bash
+curl -sL https://github.com/xmrstreetstore.gpg | gpg --import
+gpg --verify SHA256SUMS.asc SHA256SUMS
+```
+
+You should see `Good signature from "xmrstreetstore <info@xmrstreet.store>"` and this
+primary key fingerprint:
+
+```
+E8C0 F756 E611 3813 7DFF  39BE F1FD 97FD 5D2A AA2C
+```
+
+A warning that the key "is not certified with a trusted signature" is normal: it
+only means you have not signed the key yourself. **Stop if the signature is BAD or
+the fingerprint differs.**
+
+### 3. Verify the image
+
+```bash
+sha256sum -c SHA256SUMS
+```
+
+It must print `custos.pi0.img: OK`. On Windows, `Get-FileHash custos.pi0.img` must
+match the hash in `SHA256SUMS`. For the signature check on Windows, install
+[Gpg4win](https://gpg4win.org) and run the same `gpg` commands, or open
+`SHA256SUMS.asc` in Kleopatra.
+
+### 4. Flash
+
+Write the image to a microSD card with Raspberry Pi Imager or balenaEtcher, put it in
+the Pi Zero and power on.
 
 ## Repositories
 
