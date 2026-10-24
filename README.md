@@ -93,11 +93,13 @@ This proves the checksum file was made by us and not swapped along with the imag
 Import the signing key. It is the same key in all of these places, so get it from
 one and compare the fingerprint with another:
 [`keys/xmrstreetstore.asc`](keys/xmrstreetstore.asc) in this repo,
-[github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg), and
-[custos-os.com](https://custos-os.com).
+[github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg),
+[custos-os.com](https://custos-os.com/xmrstreetstore.asc), and the keyservers
+keyserver.ubuntu.com and keys.openpgp.org.
 
 ```bash
 curl -sL https://github.com/xmrstreetstore.gpg | gpg --import
+# or: gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys E8C0F756E61138137DFF39BEF1FD97FD5D2AAA2C
 gpg --verify SHA256SUMS.asc SHA256SUMS
 ```
 
