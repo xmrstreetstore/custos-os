@@ -10,7 +10,7 @@ finished `.img` out.
 cd seedsigner-os ; docker build -t ssos-builder . ; docker volume create ssbuild
 
 # copy the repos into the volume and init the buildroot submodule
-docker run --rm -v ssbuild:/work -v "C:/Users/jorge/dev/seedsigner-seedkeeper:/src:ro" `
+docker run --rm -v ssbuild:/work -v "${PWD}/..:/src:ro" `
   -v "${PWD}/../build:/s:ro" --entrypoint bash ssos-builder /s/stage.sh
 
 # build (45 min from cold; ccache makes rebuilds much faster)
@@ -29,7 +29,7 @@ Re-run `stage.sh` after any change to either repo — it copies the working tree
 
 **`--app-repo` and `--app-branch` only parse as `--flag=value`.** The help text
 prints them bare and the parser rejects that form outright. We use them to point at
-the **local** fork in the volume, since it is not pushed anywhere.
+the **local** fork in the volume. `build.sh` clones the branch from it, so the image gets the **committed** head of `seedkeeper-support`: commit app changes before building, or they are silently left out. Check `version.json` in the built image.
 
 Do not reach for `--skip-repo` instead: it skips `download_app_repo`, which also
 compiles the translations, and it leaves `version.json` unwritten. A missing

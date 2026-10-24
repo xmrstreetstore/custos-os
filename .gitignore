@@ -1,6 +1,5 @@
-# The two forks are independent git repos, tracked upstream, not submodules.
-seedsigner/
-seedsigner-os/
-
-# Build artefacts
+# Build artefacts: images are published as GitHub release assets, not committed.
 images/*.img
+*.img
+
+__pycache__/

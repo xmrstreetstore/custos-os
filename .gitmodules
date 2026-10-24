@@ -1,0 +1,8 @@
+[submodule "seedsigner"]
+	path = seedsigner
+	url = https://github.com/xmrstreetstore/custos-seedsigner.git
+	branch = seedkeeper-support
+[submodule "seedsigner-os"]
+	path = seedsigner-os
+	url = https://github.com/xmrstreetstore/custos-seedsigner-os.git
+	branch = seedkeeper-support
