@@ -23,9 +23,10 @@ for example your Downloads folder:
 | File | What it is |
 |---|---|
 | `custos.pi0.img` (50 MB) | The image you will flash |
-| `SHA256SUMS` | The image's fingerprint (checksum) |
-| `SHA256SUMS.asc` | Our signature on that checksum |
-| `SHA256SUMS.sig` | The same signature in binary form. You need only one of the two. |
+| `custos-v0.1-manifest.txt` | The image's fingerprint (checksum) |
+| `custos-v0.1-manifest.txt.asc` | Our signature on that checksum |
+| `custos-v0.1-manifest.txt.sig` | The same signature in binary form. You need only one of the two. |
+| `xmrstreetstore.asc` | Our public key. Step 4 can also fetch it for you; Sparrow needs the file. |
 
 ### Step 3. Open a terminal in that folder
 
@@ -40,7 +41,8 @@ Type this (the same on every system):
 gpg --keyserver hkps://keys.openpgp.org --recv-keys E8C0F756E61138137DFF39BEF1FD97FD5D2AAA2C
 ```
 
-It should say `public key "xmrstreetstore <info@xmrstreet.store>" imported`.
+If you downloaded `xmrstreetstore.asc`, you can type `gpg --import xmrstreetstore.asc` instead.
+Either way it should say `public key "xmrstreetstore <info@xmrstreet.store>" imported`.
 The same key is also published at [github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg),
 [custos-os.com](https://custos-os.com/xmrstreetstore.asc), keyserver.ubuntu.com and
 [in the repo](https://github.com/xmrstreetstore/custos-os/blob/master/keys/xmrstreetstore.asc),
@@ -49,10 +51,10 @@ so you can compare its fingerprint across sources.
 ### Step 5. Check the signature
 
 ```
-gpg --verify SHA256SUMS.asc SHA256SUMS
+gpg --verify custos-v0.1-manifest.txt.asc custos-v0.1-manifest.txt
 ```
 
-If you downloaded `SHA256SUMS.sig` instead, type `gpg --verify SHA256SUMS.sig SHA256SUMS`.
+If you downloaded `custos-v0.1-manifest.txt.sig` instead, type `gpg --verify custos-v0.1-manifest.txt.sig custos-v0.1-manifest.txt`.
 
 You must see **both** of these lines:
 
@@ -69,11 +71,11 @@ means you have not signed our key yourself.
 
 ### Step 6. Check the image
 
-- **Linux:** `sha256sum -c SHA256SUMS` must print `custos.pi0.img: OK`
-- **macOS:** `shasum -a 256 -c SHA256SUMS` must print `custos.pi0.img: OK`
+- **Linux:** `sha256sum -c custos-v0.1-manifest.txt` must print `custos.pi0.img: OK`
+- **macOS:** `shasum -a 256 -c custos-v0.1-manifest.txt` must print `custos.pi0.img: OK`
 - **Windows (PowerShell):** this must print `True`:
   ```
-  (Get-FileHash custos.pi0.img).Hash -eq (Get-Content SHA256SUMS).Split(' ')[0]
+  (Get-FileHash custos.pi0.img).Hash -eq (Get-Content custos-v0.1-manifest.txt).Split(' ')[0]
   ```
 
 > [!CAUTION]
@@ -81,6 +83,19 @@ means you have not signed our key yourself.
 
 For reference, the image's SHA256 is
 `f1993c7963f4bf5d96d7f86bc55c362cfb9acfa6b82fb38704cb9c522da8bb2b`.
+
+### Or: check it with Sparrow
+
+If you use [Sparrow Wallet](https://sparrowwallet.com), it can do steps 4 to 6 for you.
+
+1. Download `custos.pi0.img`, `custos-v0.1-manifest.txt`, `custos-v0.1-manifest.txt.asc` and `xmrstreetstore.asc`
+   into the same folder.
+2. In Sparrow, open **Tools › Verify Download**.
+3. Next to **Signature**, click **Browse** and pick `custos-v0.1-manifest.txt.asc`. Sparrow fills in
+   the Manifest and Release File by itself.
+4. Next to **Public Key**, click **Browse** and pick `xmrstreetstore.asc`.
+5. Sparrow must report a good signature from `xmrstreetstore <info@xmrstreet.store>`
+   and that the release file matched the manifest hash. If it doesn't, stop.
 
 ### Step 7. Flash the microSD card
 
