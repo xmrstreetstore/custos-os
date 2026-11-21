@@ -79,58 +79,86 @@ Specter Desktop, BlueWallet and others.
 
 ## Install
 
-### 1. Download
+Checking the download takes about five minutes. It proves the image is exactly the one
+we built and signed, and that nobody swapped it on the way to you. This device will
+hold your seed, so please don't skip it.
 
-From the [latest release](https://github.com/xmrstreetstore/custos-os/releases),
-download all three files:
+### Step 1. Install GPG (only once)
 
-- `custos.pi0.img` — the image
-- `SHA256SUMS` — its checksum
-- `SHA256SUMS.asc` — the checksum, signed with the xmrstreetstore key
+- **Windows:** install [Gpg4win](https://gpg4win.org) with the default options.
+- **macOS:** install [GPG Suite](https://gpgtools.org), or run `brew install gnupg`.
+- **Linux:** GPG is usually installed already. If not: `sudo apt install gnupg`.
 
-### 2. Verify the signature
+### Step 2. Download the three files
 
-This proves the checksum file was made by us and not swapped along with the image.
+Open the [latest release](https://github.com/xmrstreetstore/custos-os/releases/latest),
+scroll down to **Assets** and download all three into the same folder, for example
+your Downloads folder:
 
-Import the signing key. It is the same key in all of these places, so get it from
-one and compare the fingerprint with another:
-[`keys/xmrstreetstore.asc`](keys/xmrstreetstore.asc) in this repo,
-[github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg),
-[custos-os.com](https://custos-os.com/xmrstreetstore.asc), and the keyservers
-keyserver.ubuntu.com and keys.openpgp.org.
+| File | What it is |
+|---|---|
+| `custos.pi0.img` (50 MB) | The image you will flash |
+| `SHA256SUMS` | The image's fingerprint (checksum) |
+| `SHA256SUMS.asc` | Our signature on that checksum |
 
-```bash
-curl -sL https://github.com/xmrstreetstore.gpg | gpg --import
-# or: gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys E8C0F756E61138137DFF39BEF1FD97FD5D2AAA2C
+### Step 3. Open a terminal in that folder
+
+- **Windows:** open **PowerShell** and type `cd $HOME\Downloads`
+- **macOS / Linux:** open **Terminal** and type `cd ~/Downloads`
+
+### Step 4. Import our signing key
+
+Type this (the same on every system):
+
+```
+gpg --keyserver hkps://keys.openpgp.org --recv-keys E8C0F756E61138137DFF39BEF1FD97FD5D2AAA2C
+```
+
+It should say `public key "xmrstreetstore <info@xmrstreet.store>" imported`.
+The same key is also published at [github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg),
+[custos-os.com](https://custos-os.com/xmrstreetstore.asc), keyserver.ubuntu.com and
+[`keys/xmrstreetstore.asc`](keys/xmrstreetstore.asc) in this repo, so you can compare
+its fingerprint across sources.
+
+### Step 5. Check the signature
+
+```
 gpg --verify SHA256SUMS.asc SHA256SUMS
 ```
 
-You should see `Good signature from "xmrstreetstore <info@xmrstreet.store>"` and this
-primary key fingerprint:
+You must see **both** of these lines:
 
 ```
-E8C0 F756 E611 3813 7DFF  39BE F1FD 97FD 5D2A AA2C
+Good signature from "xmrstreetstore <info@xmrstreet.store>"
+Primary key fingerprint: E8C0 F756 E611 3813 7DFF  39BE F1FD 97FD 5D2A AA2C
 ```
 
-A warning that the key "is not certified with a trusted signature" is normal: it
-only means you have not signed the key yourself. **Stop if the signature is BAD or
-the fingerprint differs.**
+A warning that the key "is not certified with a trusted signature" is normal. It only
+means you have not signed our key yourself.
 
-### 3. Verify the image
+> [!CAUTION]
+> **Stop** if it says `BAD signature`, or if the fingerprint is different. Do not use the image.
 
-```bash
-sha256sum -c SHA256SUMS
-```
+### Step 6. Check the image
 
-It must print `custos.pi0.img: OK`. On Windows, `Get-FileHash custos.pi0.img` must
-match the hash in `SHA256SUMS`. For the signature check on Windows, install
-[Gpg4win](https://gpg4win.org) and run the same `gpg` commands, or open
-`SHA256SUMS.asc` in Kleopatra.
+- **Linux:** `sha256sum -c SHA256SUMS` must print `custos.pi0.img: OK`
+- **macOS:** `shasum -a 256 -c SHA256SUMS` must print `custos.pi0.img: OK`
+- **Windows (PowerShell):** this must print `True`:
+  ```
+  (Get-FileHash custos.pi0.img).Hash -eq (Get-Content SHA256SUMS).Split(' ')[0]
+  ```
 
-### 4. Flash
+> [!CAUTION]
+> **Stop** if you get anything else. Delete the files and download them again.
 
-Write the image to a microSD card with Raspberry Pi Imager or balenaEtcher, put it in
-the Pi Zero and power on.
+### Step 7. Flash the microSD card
+
+1. Open [Raspberry Pi Imager](https://www.raspberrypi.com/software/) (or
+   [balenaEtcher](https://etcher.balena.io)).
+2. In Raspberry Pi Imager, choose **Choose OS → Use custom** and pick `custos.pi0.img`.
+3. Choose your microSD card and write it. If it asks to apply OS customisation
+   settings, choose **No**.
+4. Put the card in the Raspberry Pi Zero v1.3 and power it on.
 
 ## Repositories
 
