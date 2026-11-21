@@ -89,10 +89,10 @@ hold your seed, so please don't skip it.
 - **macOS:** install [GPG Suite](https://gpgtools.org), or run `brew install gnupg`.
 - **Linux:** GPG is usually installed already. If not: `sudo apt install gnupg`.
 
-### Step 2. Download the three files
+### Step 2. Download the files
 
 Open the [latest release](https://github.com/xmrstreetstore/custos-os/releases/latest),
-scroll down to **Assets** and download all three into the same folder, for example
+scroll down to **Assets** and download these into the same folder, for example
 your Downloads folder:
 
 | File | What it is |
@@ -100,6 +100,7 @@ your Downloads folder:
 | `custos.pi0.img` (50 MB) | The image you will flash |
 | `SHA256SUMS` | The image's fingerprint (checksum) |
 | `SHA256SUMS.asc` | Our signature on that checksum |
+| `SHA256SUMS.sig` | The same signature in binary form. You need only one of the two. |
 
 ### Step 3. Open a terminal in that folder
 
@@ -125,6 +126,8 @@ its fingerprint across sources.
 ```
 gpg --verify SHA256SUMS.asc SHA256SUMS
 ```
+
+If you downloaded `SHA256SUMS.sig` instead, type `gpg --verify SHA256SUMS.sig SHA256SUMS`.
 
 You must see **both** of these lines:
 
