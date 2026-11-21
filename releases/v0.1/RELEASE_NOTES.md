@@ -26,7 +26,7 @@ for example your Downloads folder:
 | `custos-v0.1-manifest.txt` | The image's fingerprint (checksum) |
 | `custos-v0.1-manifest.txt.asc` | Our signature on that checksum |
 | `custos-v0.1-manifest.txt.sig` | The same signature in binary form. You need only one of the two. |
-| `xmrstreetstore.asc` | Our public key. Step 4 can also fetch it for you; Sparrow needs the file. |
+| `xmrstreetstore-pubkey.asc` | Our public key. Step 4 can also fetch it for you; Sparrow needs the file. |
 
 ### Step 3. Open a terminal in that folder
 
@@ -41,7 +41,7 @@ Type this (the same on every system):
 gpg --keyserver hkps://keys.openpgp.org --recv-keys E8C0F756E61138137DFF39BEF1FD97FD5D2AAA2C
 ```
 
-If you downloaded `xmrstreetstore.asc`, you can type `gpg --import xmrstreetstore.asc` instead.
+If you downloaded `xmrstreetstore-pubkey.asc`, you can type `gpg --import xmrstreetstore-pubkey.asc` instead.
 Either way it should say `public key "xmrstreetstore <info@xmrstreet.store>" imported`.
 The same key is also published at [github.com/xmrstreetstore.gpg](https://github.com/xmrstreetstore.gpg),
 [custos-os.com](https://custos-os.com/xmrstreetstore.asc), keyserver.ubuntu.com and
@@ -88,12 +88,12 @@ For reference, the image's SHA256 is
 
 If you use [Sparrow Wallet](https://sparrowwallet.com), it can do steps 4 to 6 for you.
 
-1. Download `custos.pi0.img`, `custos-v0.1-manifest.txt`, `custos-v0.1-manifest.txt.asc` and `xmrstreetstore.asc`
+1. Download `custos.pi0.img`, `custos-v0.1-manifest.txt`, `custos-v0.1-manifest.txt.asc` and `xmrstreetstore-pubkey.asc`
    into the same folder.
 2. In Sparrow, open **Tools › Verify Download**.
 3. Next to **Signature**, click **Browse** and pick `custos-v0.1-manifest.txt.asc`. Sparrow fills in
    the Manifest and Release File by itself.
-4. Next to **Public Key**, click **Browse** and pick `xmrstreetstore.asc`.
+4. Next to **Public Key**, click **Browse** and pick `xmrstreetstore-pubkey.asc`.
 5. Sparrow must report a good signature from `xmrstreetstore <info@xmrstreet.store>`
    and that the release file matched the manifest hash. If it doesn't, stop.
 
