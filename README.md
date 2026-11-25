@@ -21,7 +21,7 @@ signs your transaction, and keeps nothing once it powers off. Everything else is
 stock SeedSigner, on purpose.
 
 > [!NOTE]
-> **v0.1 is a beta.** It runs on a Raspberry Pi Zero v1.3 and has been tested on real
+> **v0.2 is a beta.** It runs on a Raspberry Pi Zero v1.3 and has been tested on real
 > hardware. Keep a second backup of any seed you put on a card.
 
 <p align="center">
@@ -97,10 +97,10 @@ your Downloads folder:
 
 | File | What it is |
 |---|---|
-| `custos.pi0.img` (50 MB) | The image you will flash |
-| `custos-v0.1-manifest.txt` | The image's fingerprint (checksum) |
-| `custos-v0.1-manifest.txt.asc` | Our signature on that checksum |
-| `custos-v0.1-manifest.txt.sig` | The same signature in binary form. You need only one of the two. |
+| `custos.v0.2.img` (50 MB) | The image you will flash |
+| `custos-v0.2-manifest.txt` | The image's fingerprint (checksum) |
+| `custos-v0.2-manifest.txt.asc` | Our signature on that checksum |
+| `custos-v0.2-manifest.txt.sig` | The same signature in binary form. You need only one of the two. |
 | `xmrstreetstore-pubkey.asc` | Our public key. Step 4 can also fetch it for you; Sparrow needs the file. |
 
 ### Step 3. Open a terminal in that folder
@@ -126,10 +126,10 @@ its fingerprint across sources.
 ### Step 5. Check the signature
 
 ```
-gpg --verify custos-v0.1-manifest.txt.asc custos-v0.1-manifest.txt
+gpg --verify custos-v0.2-manifest.txt.asc custos-v0.2-manifest.txt
 ```
 
-If you downloaded `custos-v0.1-manifest.txt.sig` instead, type `gpg --verify custos-v0.1-manifest.txt.sig custos-v0.1-manifest.txt`.
+If you downloaded `custos-v0.2-manifest.txt.sig` instead, type `gpg --verify custos-v0.2-manifest.txt.sig custos-v0.2-manifest.txt`.
 
 You must see **both** of these lines:
 
@@ -146,11 +146,11 @@ means you have not signed our key yourself.
 
 ### Step 6. Check the image
 
-- **Linux:** `sha256sum -c custos-v0.1-manifest.txt` must print `custos.pi0.img: OK`
-- **macOS:** `shasum -a 256 -c custos-v0.1-manifest.txt` must print `custos.pi0.img: OK`
+- **Linux:** `sha256sum -c custos-v0.2-manifest.txt` must print `custos.v0.2.img: OK`
+- **macOS:** `shasum -a 256 -c custos-v0.2-manifest.txt` must print `custos.v0.2.img: OK`
 - **Windows (PowerShell):** this must print `True`:
   ```
-  (Get-FileHash custos.pi0.img).Hash -eq (Get-Content custos-v0.1-manifest.txt).Split(' ')[0]
+  (Get-FileHash custos.v0.2.img).Hash -eq (Get-Content custos-v0.2-manifest.txt).Split(' ')[0]
   ```
 
 > [!CAUTION]
@@ -160,10 +160,10 @@ means you have not signed our key yourself.
 
 If you use [Sparrow Wallet](https://sparrowwallet.com), it can do steps 4 to 6 for you.
 
-1. Download `custos.pi0.img`, `custos-v0.1-manifest.txt`, `custos-v0.1-manifest.txt.asc` and `xmrstreetstore-pubkey.asc`
+1. Download `custos.v0.2.img`, `custos-v0.2-manifest.txt`, `custos-v0.2-manifest.txt.asc` and `xmrstreetstore-pubkey.asc`
    into the same folder.
 2. In Sparrow, open **Tools › Verify Download**.
-3. Next to **Signature**, click **Browse** and pick `custos-v0.1-manifest.txt.asc`. Sparrow fills in
+3. Next to **Signature**, click **Browse** and pick `custos-v0.2-manifest.txt.asc`. Sparrow fills in
    the Manifest and Release File by itself.
 4. Next to **Public Key**, click **Browse** and pick `xmrstreetstore-pubkey.asc`.
 5. Sparrow must report a good signature from `xmrstreetstore <info@xmrstreet.store>`
@@ -173,7 +173,7 @@ If you use [Sparrow Wallet](https://sparrowwallet.com), it can do steps 4 to 6 f
 
 1. Open [Raspberry Pi Imager](https://www.raspberrypi.com/software/) (or
    [balenaEtcher](https://etcher.balena.io)).
-2. In Raspberry Pi Imager, choose **Choose OS → Use custom** and pick `custos.pi0.img`.
+2. In Raspberry Pi Imager, choose **Choose OS → Use custom** and pick `custos.v0.2.img`.
 3. Choose your microSD card and write it. If it asks to apply OS customisation
    settings, choose **No**.
 4. Put the card in the Raspberry Pi Zero v1.3 and power it on.

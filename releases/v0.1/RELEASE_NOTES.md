@@ -110,12 +110,12 @@ If you use [Sparrow Wallet](https://sparrowwallet.com), it can do steps 4 to 6 f
 
 | Repo | Tag | Commit |
 |---|---|---|
-| custos-seedsigner | `v0.1` | `d42afed8` |
-| custos-seedsigner-os | `v0.1` | `666eda1` |
+| custos-seedsigner | `v0.1` | `d1a793b9` |
+| custos-seedsigner-os | `v0.1` | `b3d6446` |
 
 The image's `version.json` reports `f84d215`: the image was built before the commit
 messages were tidied, which changed the commit IDs but not the code. `f84d215c` and
-`d42afed8` (app) and `9388c8f` and `666eda1` (OS) have identical file trees. Seven verifiers passed on this build
+`d1a793b9` (app) and `9388c8f` and `b3d6446` (OS) have identical file trees. Seven verifiers passed on this build
 (`verify`, `verify-img`, `verify-app`, `verify-imports`, `verify-crypto`,
 `verify-reader`, `verify-seed-layout`).
 
